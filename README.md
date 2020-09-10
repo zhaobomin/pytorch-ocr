@@ -10,7 +10,7 @@
 
 1. darknet-ocr [[github](https://github.com/chineseocr/darknet-ocr)]，**pytorch-ocr 最主要的参考项目，模型结构和预训练权重均来自于此项目**。它是 github 上效果比较好的中文 OCR 项目，模型设计比较浅，性能和准确率都不错，但未提供训练代码，同时环境部署比较复杂。
 2. pytorch_ctpn [[github](https://github.com/opconty/pytorch_ctpn)]，CTPN 网络的 Pytorch 版本，参考 ctpn 网络的 loss 函数设计
-3. PyTorch-YOLOv3[[github](https://github.com/eriklindernoren/PyTorch-YOLOv3)]，YOLO 的 Pytorch 版本，此项目提供 darknet 转 pytorch 的思路和基础代码实现
+3. PyTorch-YOLOv3 [[github](https://github.com/eriklindernoren/PyTorch-YOLOv3)]，YOLO 的 Pytorch 版本，此项目提供 darknet 转 pytorch 的思路和基础代码实现
 
 ## 模型思路
 
