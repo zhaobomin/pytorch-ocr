@@ -1,4 +1,5 @@
 git_push.sh
+.vscode/
 .DS_Store
 *.pth
 *.pt

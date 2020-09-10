@@ -34,7 +34,7 @@ parser.add_argument('--imgH', type=int, default=32,
 parser.add_argument('--nepoch', type=int, default=5000000000,
                     help='number of epochs to train for')
 
-parser.add_argument('--pretrained', default='weights/ocr/chinese/ocr_best.pth',
+parser.add_argument('--pretrained', default='weights/ocr/chinese/ocr_training.pth',
                     help="path to pretrained model (to continue training)")
 
 parser.add_argument('--lr', type=float, default=0.01,
@@ -48,12 +48,12 @@ parser.add_argument('--adadelta', action='store_true',
 
 
 def init_dataloader(opt):
-    train_dataset = dataset_crnn.lmdbDataset(root=opt.trainRoot)
+    train_dataset = dataset_crnn.lmdbDataset(
+        root=opt.trainRoot, transform=dataset_crnn.resizeNormalize(32))
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=1,
         shuffle=True,
-        num_workers=int(opt.workers),
-        collate_fn=dataset_crnn.alignCollate(imgH=opt.imgH, imgW=None, keep_ratio=True))
+        num_workers=int(opt.workers))
 
     test_dataset = dataset_crnn.lmdbDataset(
         root=opt.valRoot, transform=dataset_crnn.resizeNormalize(32))
@@ -89,7 +89,7 @@ def init_model(ocrCfgPath, alphabet, pretrained=''):
 def init_optimizer(net, opt):
     # setup optimizer
     params = net.parameters()
-    opt.adadelta = 1
+    opt.adam = 1
 
     if opt.adam:
         print('use optim.Adam')

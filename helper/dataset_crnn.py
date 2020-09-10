@@ -110,42 +110,6 @@ class resizeNormalize(object):
         return img
 
 
-class alignCollate(object):
-
-    def __init__(self, imgH=32, imgW=100, keep_ratio=False, min_ratio=1):
-        self.imgH = imgH
-        self.imgW = imgW
-        self.keep_ratio = keep_ratio
-        self.min_ratio = min_ratio
-
-    def __call__(self, batch):
-        images, labels = zip(*batch)
-
-        imgH = self.imgH
-        imgW = self.imgW
-        if self.keep_ratio:
-            ratios = []
-            for image in images:
-                w, h = image.size
-
-                # 竖版文字支持，转90度处理
-                if h > w*1.5:
-                    image = image.rotate(90, expand=1)
-                    w, h = image.size
-
-                ratios.append(w / float(h))
-            ratios.sort()
-            max_ratio = ratios[-1]
-            imgW = int(np.floor(max_ratio * imgH))
-            imgW = max(imgH * self.min_ratio, imgW)  # assure imgH >= imgW
-
-        transform = resizeNormalize(imgH, imgW)
-        images = [transform(image) for image in images]
-        images = torch.cat([t.unsqueeze(0) for t in images], 0)
-
-        return images, labels
-
-
 class strLabelConverter(object):
     """Convert between str and label.
 

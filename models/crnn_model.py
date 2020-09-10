@@ -61,6 +61,7 @@ class CRNN_NET:
         w = int(w)
         image = image.resize((w, 32), Image.BILINEAR)
         image = (np.array(image.convert('L'))/255.0-0.5)/0.5
+
         h, w = image.shape
         if w < 8:
             return {'chars': [], 'text': '', 'prob': 0}
