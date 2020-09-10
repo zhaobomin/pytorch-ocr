@@ -1,2 +1,0 @@
-# pytorch-ocr
-- TODO
