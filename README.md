@@ -25,7 +25,7 @@
 git clone git-url
 ```
 
-2. 下载模型文件（中文）
+2. 下载模型文件（中文）[gdrive 下载](https://drive.google.com/file/d/1H8AdYObqDMHtj75Sm8WvGR1rVNur1izz/view?usp=sharing)
 
 ```
 pytorch-ocr-weights.zip解压缩后拷贝到weights下，直接覆盖文件夹

@@ -203,6 +203,6 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     opt.keep_ratio = True
     opt.alphabet, _ = config.get_characters()
-    opt.save_weights = 'weights/ocr/chinese/ocr_training.pth'
+    opt.save_weights = 'weights/ocr/chinese/ocr.pth'
 
     train(opt)
