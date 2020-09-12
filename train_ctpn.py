@@ -76,8 +76,8 @@ def train(img_dir, label_dir, model_cfg='weights/text/text.cfg', pretrained='wei
             out_cls, out_regr = reshape_tensor(
                 out[:, :20, ...]), reshape_tensor(out[:, 20:, ...])
 
-            loss_regr = critetion_regr(torch.Tensor(out_regr), regrs)
-            loss_cls = critetion_cls(torch.Tensor(out_cls), clss)
+            loss_regr = critetion_regr(out_regr, regrs)
+            loss_cls = critetion_cls(out_cls, clss)
 
             loss = loss_cls + loss_regr
 
@@ -119,4 +119,4 @@ if __name__ == '__main__':
     img_dir = './ctpn_dataset/image/'
     label_dir = './ctpn_dataset/voc-label/'
     train(img_dir, label_dir, model_cfg='weights/text/text.cfg',
-          pretrained='weights/text/text.pth', batch_size=4, epochs=1000,  lr=0.001)
+          pretrained='weights/text/text.pth', batch_size=8, epochs=1000,  lr=0.001)

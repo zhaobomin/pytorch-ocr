@@ -82,11 +82,11 @@ class VOCDataset(Dataset):
             img, scalefactor=1.0, size=(w, h), swapRB=False, crop=False)
         img = img.reshape(3, h, w)
 
-        Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
+        # = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
         img = torch.tensor(img)
 
-        img = Variable(img).type(Tensor)
+        #img = Variable(img).type(Tensor)
         xml_path = os.path.join(self.labelsdir, img_name.split('.')[0]+'.xml')
         gtbox = self.generate_gtboxes(xml_path, rescale_fac)
         feature_size = (int(np.ceil(h/16)), int(np.ceil(w/16)))

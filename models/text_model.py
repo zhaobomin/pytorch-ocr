@@ -50,7 +50,7 @@ class TEXT_NET:
 
         res = self.net(image)
 
-        out = res.detach().numpy()
+        out = res.detach().cpu().numpy()
         #print('pytorch out:', out.shape)
         clsOut = reshape(out[:, :20, ...])
         boxOut = reshape(out[:, 20:, ...])

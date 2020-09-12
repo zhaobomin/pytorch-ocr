@@ -72,7 +72,7 @@ class CRNN_NET:
         with torch.no_grad():
             y_pred = self.net(image)
 
-        out = y_pred[0][:, 0, :].detach().numpy()
+        out = y_pred[0][:, 0, :].detach().cpu().numpy()
         out = out.transpose((1, 0))
         out = darknet_model.softmax(out)
 
