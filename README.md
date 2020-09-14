@@ -37,7 +37,7 @@ pytorch-ocr-weights.zip解压缩后拷贝到weights下，直接覆盖文件夹
 python3 predict_demo.py test/demo_text_ocr.png
 ```
 
-![](./test/pred_box.jpg)
+![](./test/pred_box_demo.jpg)
 
 ```
 [{
