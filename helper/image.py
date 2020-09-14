@@ -15,67 +15,13 @@ import datetime as dt
 from config import *
 
 
-def get_now():
-    """
-    获取当前时间
-    """
-    try:
-        now = dt.datetime.now()
-        nowString = now.strftime('%Y-%m-%d %H:%M:%S')
-    except:
-        nowString = '00-00-00 00:00:00'
-    return nowString
-
-
-def read_url_img(url):
-    """
-    爬取网页图片
-    """
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36'}
-    try:
-        req = requests.get(url, headers=headers, timeout=5)  # 访问时间超过5s，则超时
-        if req.status_code == 200:
-            imgString = req.content
-            buf = six.BytesIO()
-            buf.write(imgString)
-            buf.seek(0)
-            img = Image.open(buf).convert('RGB')
-            return img
-        else:
-            return None
-    except:
-        # traceback.print_exc()
-        return None
-
-
-def base64_to_PIL(string):
-    try:
-
-        base64_data = base64.b64decode(string.split('base64,')[-1])
-        buf = six.BytesIO()
-        buf.write(base64_data)
-        buf.seek(0)
-        img = Image.open(buf).convert('RGB')
-        return img
-    except:
-        return None
-
-
-def soft_max(x):
-    """numpy softmax"""
-    expz = np.exp(x)
-    sumz = np.sum(expz, axis=1)
-    return expz[:, 1]/sumz
-
-
 def reshape_tensor(x):
     x = x.permute(0, 2, 3, 1).contiguous()
     x = x.view(x.size(0), x.size(1)*x.size(2)*10, 2)
     return x
 
 
-def reshape(x):
+def reshape2(x):
     b = x.shape
     x = x.transpose(0, 2, 3, 1)
     b = x.shape
@@ -96,13 +42,17 @@ def resize_img(image, scale, maxScale=None):
     image = cv2.merge(imageList)
     h, w = image.shape[:2]
     rate = scale/min(h, w)
+
     if maxScale is not None:
         if rate*max(h, w) > maxScale:
             rate = maxScale/max(h, w)
 
+    if rate >= 1.0:
+        rate = 1.0
+
     image = cv2.resize(image, None, None, fx=rate, fy=rate,
                        interpolation=cv2.INTER_LINEAR)
-    #image = cv2.resize(image, (608, 288), interpolation=cv2.INTER_LINEAR)
+
     return image, rate
 
 
@@ -181,71 +131,16 @@ def compute_iou(anchors, bbox):
 
 
 def bbox_transfrom(anchors, gtboxes):
-    gt_y = (gtboxes[:, 1] + gtboxes[:, 3]) * 0.5
+    gt_y = (gtboxes[:, 1] + gtboxes[:, 3])/2.0
     gt_h = gtboxes[:, 3] - gtboxes[:, 1] + 1.0
 
-    anchor_y = (anchors[:, 1] + anchors[:, 3]) * 0.5
+    anchor_y = (anchors[:, 1] + anchors[:, 3])/2.0
     anchor_h = anchors[:, 3] - anchors[:, 1] + 1.0
 
     Vc = (gt_y - anchor_y) / anchor_h
     Vh = np.log(gt_h / anchor_h)
 
     return np.vstack((Vc, Vh)).transpose()
-
-
-'''
-已知 anchor和差异参数 regression_factor(Vc, Vh),计算目标框 bbox
-'''
-
-
-def transform_bbox(anchor, regression_factor):
-    anchor_y = (anchor[:, 1] + anchor[:, 3]) * 0.5
-    anchor_x = (anchor[:, 0] + anchor[:, 2]) * 0.5
-    anchor_h = anchor[:, 3] - anchor[:, 1] + 1
-
-    Vc = regression_factor[0, :, 0]
-    Vh = regression_factor[0, :, 1]
-
-    bbox_y = Vc * anchor_h + anchor_y
-    bbox_h = np.exp(Vh) * anchor_h
-
-    x1 = anchor_x - 16 * 0.5
-    y1 = bbox_y - bbox_h * 0.5
-    x2 = anchor_x + 16 * 0.5
-    y2 = bbox_y + bbox_h * 0.5
-    bbox = np.vstack((x1, y1, x2, y2)).transpose()
-
-    return bbox
-
-
-'''
-bbox 边界裁剪
-    x1 >= 0
-    y1 >= 0
-    x2 < im_shape[1]
-    y2 < im_shape[0]
-'''
-
-
-def clip_bbox(bbox, im_shape):
-    bbox[:, 0] = np.maximum(np.minimum(bbox[:, 0], im_shape[1] - 1), 0)
-    bbox[:, 1] = np.maximum(np.minimum(bbox[:, 1], im_shape[0] - 1), 0)
-    bbox[:, 2] = np.maximum(np.minimum(bbox[:, 2], im_shape[1] - 1), 0)
-    bbox[:, 3] = np.maximum(np.minimum(bbox[:, 3], im_shape[0] - 1), 0)
-
-    return bbox
-
-
-'''
-bbox尺寸过滤，舍弃小于设定最小尺寸的bbox
-'''
-
-
-def filter_bbox(bbox, minsize):
-    ws = bbox[:, 2] - bbox[:, 0] + 1
-    hs = bbox[:, 3] - bbox[:, 1] + 1
-    keep = np.where((ws >= minsize) & (hs >= minsize))[0]
-    return keep
 
 
 '''
@@ -277,18 +172,22 @@ def cal_rpn(imgsize, featuresize, scale, gtboxes):
     labels[anchor_max_overlaps > IOU_POSITIVE] = 1
     labels[anchor_max_overlaps < IOU_NEGATIVE] = 0
 
+    #[cls, regr] = cal_rpn((h, w), feature_size, 16, gtbox)
+    (h, w) = imgsize
     outside_anchor = np.where(
         (base_anchor[:, 0] < 0) |
         (base_anchor[:, 1] < 0) |
-        (base_anchor[:, 2] >= imgsize[1]) |
-        (base_anchor[:, 3] >= imgsize[0])
+        (base_anchor[:, 2] >= w) |  # x位置
+        (base_anchor[:, 3] >= h)  # y位置
     )[0]
     labels[outside_anchor] = -1
 
     fg_index = np.where(labels == 1)[0]
+
     if (len(fg_index) > RPN_POSITIVE_NUM):
         labels[np.random.choice(fg_index, len(
             fg_index) - RPN_POSITIVE_NUM, replace=False)] = -1
+
     if not OHEM:
         bg_index = np.where(labels == 0)[0]
         num_bg = RPN_TOTAL_NUM - np.sum(labels == 1)
@@ -299,13 +198,15 @@ def cal_rpn(imgsize, featuresize, scale, gtboxes):
     bbox_targets = bbox_transfrom(
         base_anchor, gtboxes[anchor_argmax_overlaps, :])
 
+    # labels,  [anchor_nums], 0为负样本，1为正样本，-1为舍弃项 ,
+    # bbox_targets, [anchor_nums, vcenter, vheight]
     return [labels, bbox_targets]
 
 
+# encode boxes
 def get_origin_box(size, boxes, scale=16):
     w, h = size
     gridbox = gen_anchor((int(np.ceil(h/scale)), int(np.ceil(w/scale))), scale)
-    #print('gridbox', gridbox.shape)
 
     gridcy = (gridbox[:, 1]+gridbox[:, 3])/2.0
     gridh = (gridbox[:, 3]-gridbox[:, 1]+1)
@@ -317,7 +218,13 @@ def get_origin_box(size, boxes, scale=16):
     ymax = cy+ch/2
     gridbox[:, 1] = ymin
     gridbox[:, 3] = ymax
-    #print('gridbox:', gridbox.shape)
+
+    gridcx = (gridbox[:, 0] + gridbox[:, 2])/2.0
+    xmin = gridcx - scale * 0.5
+    xmax = gridcx + scale * 0.5
+    gridbox[:, 0] = xmin
+    gridbox[:, 2] = xmax
+
     return gridbox
 
 
