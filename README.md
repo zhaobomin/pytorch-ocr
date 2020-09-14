@@ -93,5 +93,5 @@ python3 train_crnn.py
    - 开始训练(可以根据实际需要修改参数)
 
 ```
-python3 train_ctpn.py
+python3 train_ctpn.py init
 ```
