@@ -25,7 +25,7 @@ parser.add_argument('--trainRoot', default='crnn_dataset/train/',
 parser.add_argument(
     '--valRoot', default='crnn_dataset/test/',  help='path to dataset')
 parser.add_argument('--workers', type=int,
-                    help='number of data loading workers', default=2)
+                    help='number of data loading workers', default=1)
 parser.add_argument('--batchSize', type=int,
                     default=4, help='input batch size')
 parser.add_argument('--imgH', type=int, default=32,
@@ -34,7 +34,7 @@ parser.add_argument('--imgH', type=int, default=32,
 parser.add_argument('--nepoch', type=int, default=5000000000,
                     help='number of epochs to train for')
 
-parser.add_argument('--pretrained', default='weights/ocr/chinese/ocr_training.pth',
+parser.add_argument('--pretrained', default='weights/ocr/chinese/ocr_best.pth',
                     help="path to pretrained model (to continue training)")
 
 parser.add_argument('--lr', type=float, default=0.01,
@@ -203,6 +203,6 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     opt.keep_ratio = True
     opt.alphabet, _ = config.get_characters()
-    opt.save_weights = 'weights/ocr/chinese/ocr.pth'
+    opt.save_weights = 'weights/ocr/chinese/ocr_training.pth'
 
     train(opt)

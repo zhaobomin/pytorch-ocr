@@ -1,4 +1,12 @@
 # -*- coding:utf-8 -*-
+
+import torch.nn.functional as F
+from torch import nn
+import sys
+from models import darknet_model
+from helper.detectors import TextDetector
+from helper.image import resize_img, get_origin_box
+import config
 import os
 import numpy as np
 import cv2
@@ -32,6 +40,26 @@ def readxml(path):
     return np.array(gtboxes)
 
 
+def decode_test(scores, boxes, size, rate,
+                MAX_HORIZONTAL_GAP=30,
+                MIN_V_OVERLAPS=0.6,
+                MIN_SIZE_SIM=0.6,
+                TEXT_PROPOSALS_MIN_SCORE=0.7,
+                TEXT_PROPOSALS_NMS_THRESH=0.3,
+                TEXT_LINE_NMS_THRESH=0.9,
+                TEXT_LINE_SCORE=0.9
+                ):
+    MAX_HORIZONTAL_GAP = max(16, MAX_HORIZONTAL_GAP)
+    detectors = TextDetector(
+        MAX_HORIZONTAL_GAP, MIN_V_OVERLAPS, MIN_SIZE_SIM)
+
+    text_lines, scores = detectors.detect(
+        boxes, scores, size, TEXT_PROPOSALS_MIN_SCORE, TEXT_PROPOSALS_NMS_THRESH, TEXT_LINE_NMS_THRESH, TEXT_LINE_SCORE)
+    if len(text_lines) > 0:
+        text_lines = text_lines/rate
+    return text_lines, scores
+
+
 '''
 读取VOC格式数据，返回用于训练的图像、anchor目标框、标签
 '''
@@ -54,6 +82,7 @@ class VOCDataset(Dataset):
     def generate_gtboxes(self, xml_path, rescale_fac=1.0):
         base_gtboxes = readxml(xml_path)
         gtboxes = []
+
         for base_gtbox in base_gtboxes:
             xmin, ymin, xmax, ymax = base_gtbox
             if rescale_fac > 1.0:
@@ -62,7 +91,7 @@ class VOCDataset(Dataset):
                 ymin = int(ymin / rescale_fac)
                 ymax = int(ymax / rescale_fac)
             prev = xmin
-            for i in range(xmin // 16 + 1, xmax // 16 + 1):
+            for i in range(int(np.ceil(xmin/16)), int(np.ceil(xmax/16))):
                 next = 16*i-0.5
                 gtboxes.append((prev, ymin, next, ymax))
                 prev = next
@@ -82,20 +111,36 @@ class VOCDataset(Dataset):
             img, scalefactor=1.0, size=(w, h), swapRB=False, crop=False)
         img = img.reshape(3, h, w)
 
-        Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
+        # = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
 
         img = torch.tensor(img)
 
-        img = Variable(img).type(Tensor)
+        # img = Variable(img).type(Tensor)
         xml_path = os.path.join(self.labelsdir, img_name.split('.')[0]+'.xml')
         gtbox = self.generate_gtboxes(xml_path, rescale_fac)
+
         feature_size = (int(np.ceil(h/16)), int(np.ceil(w/16)))
         [cls, regr] = cal_rpn((h, w), feature_size, 16, gtbox)
-        regr = np.hstack([cls.reshape(cls.shape[0], 1), regr])
-        cls = np.expand_dims(cls, axis=0)
 
-        cls = torch.from_numpy(cls).float()
+        # DEBUG decode test
+        if False:
+            text_boxes = get_origin_box((w, h), regr)
+            text_boxes, test_scores = decode_test(
+                cls, text_boxes, (h, w), rate)
+
+            test_img = cv2.imread(img_path)
+            text_img_out = draw_frame(test_img, text_boxes)
+            cv2.imwrite("test/img-%d.jpg" % idx,  text_img_out)
+
+        # END
+
+        # regr = [ancher_nums, 3]
+        regr = np.hstack([cls.reshape(cls.shape[0], 1), regr])
         regr = torch.from_numpy(regr).float()
+
+        # cls = [1, ancher_nums]
+        cls = np.expand_dims(cls, axis=0)
+        cls = torch.from_numpy(cls).float()
 
         return img, cls, regr
 

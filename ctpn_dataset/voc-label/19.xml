@@ -1,26 +1,19 @@
 <annotation>
-	<folder>image</folder>
-	<filename>19.jpg</filename>
-	<path>/home/wjunjian/github/text-detection-ctpn/dataset/image/19.jpg</path>
-	<source>
-		<database>Unknown</database>
-	</source>
-	<size>
-		<width>650</width>
-		<height>420</height>
-		<depth>3</depth>
-	</size>
-	<segmented>0</segmented>
-	<object>
-		<name>bank-card-number</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>100</xmin>
-			<ymin>223</ymin>
-			<xmax>572</xmax>
-			<ymax>260</ymax>
-		</bndbox>
-	</object>
+    <folder>image copy</folder>
+    <filename>19.jpg</filename>
+    <size>
+        <width>650</width>
+        <height>420</height>
+        <depth>3</depth>
+    </size>
+    <object>
+        <name>bank-card-number</name>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>98</xmin>
+            <ymin>223</ymin>
+            <xmax>572</xmax>
+            <ymax>266</ymax>
+        </bndbox>
+    </object>
 </annotation>

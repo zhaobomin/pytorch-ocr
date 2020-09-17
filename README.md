@@ -4,7 +4,7 @@
 
 1. 线下业务场景存在大量 OCR 需求，如：保单、票据、车牌、VIN...等
 2. 调研腾讯、阿里等 OCR 云服务，准确率无法满足特定场景
-3. 目前中文 OCR 开源效果最好的项目是 darknet-ocr(原 chinese-ocr)，但作者为提供训练代码，同时环境配置非常复杂
+3. 目前中文 OCR 开源效果最好的项目是 darknet-ocr(原 chinese-ocr)，但作者未提供训练代码，同时环境配置非常复杂
 
 ## 参考项目：
 
@@ -37,7 +37,7 @@ pytorch-ocr-weights.zip解压缩后拷贝到weights下，直接覆盖文件夹
 python3 predict_demo.py test/demo_text_ocr.png
 ```
 
-![](./test/pred_box.jpg)
+![](./test/pred_box_demo.jpg)
 
 ```
 [{
@@ -93,5 +93,5 @@ python3 train_crnn.py
    - 开始训练(可以根据实际需要修改参数)
 
 ```
-python3 train_ctpn.py
+python3 train_ctpn.py init
 ```
