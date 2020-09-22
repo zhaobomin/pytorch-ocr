@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from models import darknet_model
+
 import cv2
 from torch.autograd import Variable
 import os
@@ -10,8 +10,9 @@ import json
 import numpy as np
 from PIL import Image
 import torch
-import config
 import sys
+from models import darknet_model
+import config
 
 
 class CRNN_NET:
