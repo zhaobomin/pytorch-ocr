@@ -21,7 +21,7 @@ class CRNN_NET:
         self.charactersPred, _ = config.get_characters()
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
-
+        print("device:", self.device)
         if cfg == None:
             cfg = config.ocrCfgPath
         self.net = darknet_model.Darknet(cfg).to(self.device)
