@@ -3,21 +3,17 @@
 import torch.nn.functional as F
 from torch import nn
 import sys
-from models import darknet_model
-from helper.detectors import TextDetector
-from helper.image import resize_img, get_origin_box
-import config
 import os
 import numpy as np
 import cv2
 import torch
 from torch.utils.data import Dataset
 import xml.etree.ElementTree as ET
-from helper.image import cal_rpn
 from PIL import Image
-from helper.image import resize_img
 from torch.autograd import Variable
 
+from .detectors import TextDetector
+from .image import resize_img, get_origin_box, cal_rpn
 
 '''
 从xml文件中读取图像中的真值框

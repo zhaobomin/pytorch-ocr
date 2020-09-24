@@ -1,7 +1,7 @@
 # coding:utf-8
 import numpy as np
-from helper.text_proposal_connector import TextProposalConnector
-from helper.image import rotate_nms, nms, get_boxes
+from .text_proposal_connector import TextProposalConnector
+from .image import rotate_nms, nms, get_boxes
 
 
 def normalize(data):

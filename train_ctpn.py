@@ -7,10 +7,10 @@ import torch
 from torch.utils.data import DataLoader
 from torch import optim
 
-from models.text_model import RPN_CLS_Loss, RPN_REGR_Loss
-from models import darknet_model
-from helper.dataset_ctpn import VOCDataset
-from helper.image import reshape_tensor
+from model_ctpn.text_model import RPN_CLS_Loss, RPN_REGR_Loss
+from model_ctpn import darknet_model
+from model_ctpn.helper.dataset_ctpn import VOCDataset
+from model_ctpn.helper.image import reshape_tensor
 
 random_seed = 2019
 torch.random.manual_seed(random_seed)

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from helper.dataset_ctpn import draw_frame, rotate_cut_img
+from . import darknet_model
+from .helper.dataset_ctpn import draw_frame, rotate_cut_img
+from .helper.image import resize_img, get_origin_box, reshape_tensor
+from .helper.detectors import TextDetector
+from .helper import image as util
 import cv2
 import numpy as np
-import config
-from helper.image import resize_img, get_origin_box, reshape_tensor
-from helper.detectors import TextDetector
-from models import darknet_model
+
 from PIL import Image
 import sys
 import torch
@@ -16,18 +17,14 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 
 
-class TEXT_NET:
-    def __init__(self, weights=None, cfg=None):
+class ctpn_net:
+    def __init__(self, weights, cfg):
 
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         print(self.device)
-        if cfg == None:
-            cfg = config.textCfgPath
-        self.net = darknet_model.Darknet(cfg).to(self.device)
 
-        if weights == None:
-            weights = config.textPath
+        self.net = darknet_model.Darknet(cfg).to(self.device)
 
         if weights.endswith('.weights'):
             self.net.load_darknet_weights(weights)
@@ -188,7 +185,7 @@ class RPN_CLS_Loss(nn.Module):
     # input = [N, anchor_nums, 2], target = [N, 1, anchor_nums]
 
     def forward(self, input, target):
-        if config.OHEM:
+        if util.OHEM:
             # gt的cls的scores
             cls_gt = target[0][0]
 
@@ -216,7 +213,7 @@ class RPN_CLS_Loss(nn.Module):
             loss_neg = self.L_cls(cls_pred_neg.view(-1, 2), gt_neg.view(-1))
             # 取TopK的负样本loss
             loss_neg_topK, _ = torch.topk(loss_neg, min(
-                len(loss_neg), config.RPN_TOTAL_NUM - num_pos))
+                len(loss_neg), util.RPN_TOTAL_NUM - num_pos))
 
             num_neg_pos = len(loss_neg_topK)
 

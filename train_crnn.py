@@ -10,9 +10,9 @@ from torch.autograd import Variable
 import numpy as np
 from torch.nn import CTCLoss
 import os
-from helper import dataset_crnn
+from model_crnn.helper import dataset_crnn
 
-from models import darknet_model
+from model_crnn import darknet_model
 import config
 
 # 1.  创建数据集：1. cd crnn_dataset 2. python3 create_dataset.py train_val.txt test_val.txt

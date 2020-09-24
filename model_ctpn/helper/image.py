@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-image
-@author: chineseocr
-"""
+
 import numpy as np
 import cv2
 import requests
@@ -12,7 +9,14 @@ from PIL import Image
 import traceback
 import base64
 import datetime as dt
-from config import *
+
+IOU_NEGATIVE = 0.3
+IOU_POSITIVE = 0.7
+IOU_SELECT = 0.7
+
+OHEM = True
+RPN_POSITIVE_NUM = 150
+RPN_TOTAL_NUM = 300
 
 
 def reshape_tensor(x):

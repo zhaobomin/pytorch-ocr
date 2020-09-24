@@ -1,6 +1,7 @@
 
 import config
-from models import crnn_model, text_model
+from model_crnn import crnn_model
+from model_ctpn import text_model
 import sys
 import cv2
 import time
@@ -8,8 +9,10 @@ from PIL import Image
 
 if __name__ == '__main__':
     img = cv2.imread(sys.argv[1])
-    net_text = text_model.TEXT_NET()
-    net_ocr = crnn_model.CRNN_NET()
+    net_text = text_model.ctpn_net(
+        'weights/text/text.pth', 'weights/text/text.cfg')
+    net_ocr = crnn_model.crnn_net(
+        config.ocrPath, config.ocrCfgPath, config.charactersPath)
 
     boxes, scores = net_text.predict(img)
 

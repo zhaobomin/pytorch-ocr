@@ -10,7 +10,8 @@ from PIL import Image
 class OCR:
     def __init__(self):
         self.net_text = text_model.TEXT_NET()
-        self.net_ocr = crnn_model.CRNN_NET()
+        self.net_ocr = crnn_model.CRNN_NET(
+            config.ocrPath, config.ocrCfgPath, config.charactersPath)
 
     def predict_text(self, img, output_file=''):
         #img = Image.fromarray(img)

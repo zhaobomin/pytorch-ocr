@@ -3,6 +3,7 @@ git_push.sh
 .DS_Store
 *.pth
 *.pt
+*.trt
 *.weights
 *.pyc
 *.pyo

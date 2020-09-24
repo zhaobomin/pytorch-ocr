@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-
 import cv2
 from torch.autograd import Variable
 import os
@@ -11,23 +9,27 @@ import numpy as np
 from PIL import Image
 import torch
 import sys
-from models import darknet_model
-import config
+from . import darknet_model
 
 
-class CRNN_NET:
-    def __init__(self, weights=None, cfg=None):
+def _get_characters(characters_path):
+    with open(characters_path, encoding='utf-8') as f:
+        characters = json.loads(f.read())
+        characters = ' '+characters+'-｜'
 
-        self.charactersPred, _ = config.get_characters()
+        return characters, len(characters)
+
+
+class crnn_net:
+    def __init__(self, weights, cfg, characters_path):
+
+        self.characters, _ = _get_characters(characters_path)
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         print("device:", self.device)
-        if cfg == None:
-            cfg = config.ocrCfgPath
+
         self.net = darknet_model.Darknet(cfg).to(self.device)
 
-        if weights == None:
-            weights = config.ocrPath
         if weights.endswith('.weights'):
             self.net.load_darknet_weights(weights)
         else:
@@ -42,10 +44,10 @@ class CRNN_NET:
         length = len(t)
         charList = []
         probList = []
-        n = len(self.charactersPred)
+        n = len(self.characters)
         for i in range(length):
             if t[i] not in [n-1, n-1] and (not (i > 0 and t[i - 1] == t[i])):
-                charList.append(self.charactersPred[t[i]])
+                charList.append(self.characters[t[i]])
                 probList.append(prob[i])
         '''
         res = {'text': ''.join(charList),
